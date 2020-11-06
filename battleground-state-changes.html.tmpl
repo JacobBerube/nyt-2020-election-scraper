@@ -5,7 +5,6 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-    <meta http-equiv="refresh" content="60">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
@@ -19,6 +18,16 @@
         padding: .25rem .5rem;
     }
 
+    .table th.text-center {
+        position: sticky;
+        top: -1px;
+    }
+
+     .table th.has-tip {
+        position: sticky;
+        top: calc(.25rem + 1.5rem + 2px);
+    }
+
     .has-tip:after{
         content: "ℹ";
         margin-left: 5px;
@@ -30,15 +39,43 @@
     .Trump{
         background-color: #ED98A9;
     }
-}
+
+    @media (prefers-color-scheme: dark) {
+        body {
+            color: #ffffff;
+            background-color: #202020;
+        }
+        .table {
+            color: #dedad6;
+            background-color: #202020;
+        }
+        .table .thead-light th {
+            background-color: #495057;
+            color: #e9ecef;
+        }
+        .table .thead-light th, .table td {
+            border-color: #211d19;
+        }
+        .Biden {
+            background-color: #05456F;
+        }
+        .Trump {
+            background-color: #6E192A;
+        }
+    }
     </style>
-    <title>Election 2020 | Last scrape of NYT: {% SCRAPE %}</title>
+    <title>Election 2020 | Last scrape: {% SCRAPE %}</title>
 </head>
 
 <body>
     <p style="font-size: 1.4rem;">
         Auto updating. Last scrape: <span class="scrape-timestamp">{% SCRAPE %}</span>
     </p>
+
+    <p class="text-right">
+      <button type='button' id='shrink_button' class='btn btn-secondary'>Shrink Tables</button>
+    </p>
+
 
     {% TABLES %}
 
@@ -68,9 +105,35 @@
         $(".timestamp").map(function (idx, tselem) {
             tselem.innerHTML = "<abbr title='" + tselem.innerHTML + "'>" + dayjs.utc(tselem.innerHTML.replace(" UTC", ""), 'YYYY-MM-DD HH:MM:SS').fromNow() + "</abbr>"
         })
-        
-        $(".scrape-timestamp-dis").map(function (idx, tselem) {
-            tselem.innerHTML = "<abbr title='" + tselem.innerHTML + "'>" + dayjs.utc(tselem.innerHTML.replace(" (UTC)", ""), 'E MMM dd HH:MM:SS yyyy').fromNow() + "</abbr>"
-        })
+
+        const $shrinkButton = $('#shrink_button');
+
+        const shrinkTables = () => {
+            $shrinkButton.html('Expand Tables');
+            $('.table').each(function() { $(this).find('tbody tr:gt(2)').hide(); });
+            localStorage.setItem(shrunkLocalStorageKey, 'true');
+        };
+
+        const expandTables = () => {
+            $shrinkButton.html('Shrink Tables');
+            $('.table').each(function() { $(this).find('tbody tr').show(); });
+            localStorage.removeItem(shrunkLocalStorageKey);
+        };
+
+        const isShrunk = () => localStorage.getItem(shrunkLocalStorageKey) === 'true';
+
+        const shrunkLocalStorageKey = 'shrunk';
+
+        $shrinkButton.on('click', function() {
+            if (isShrunk()) {
+                expandTables();
+            } else {
+                shrinkTables();
+            }
+        });
+
+        if (localStorage.getItem(shrunkLocalStorageKey)) {
+            shrinkTables();
+        }
     </script>
 </body>
